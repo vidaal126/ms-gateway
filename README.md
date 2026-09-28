@@ -81,6 +81,8 @@ Validadas com Zod no boot. Veja `.env.example`.
 
 | Variável | Padrão | Descrição |
 |---|---|---|
+| `PORT` | 8088 | porta pública (API e health) |
+| `METRICS_PORT` | 9464 | porta interna do `/metrics`; diferente de `PORT` e não publicada |
 | `UPSTREAM_*_URL` | obrigatórias | URL base de cada serviço |
 | `AUTH_JWKS_URL` | obrigatória | JWKS do ms-auth |
 | `AUTH_ISSUER` / `AUTH_AUDIENCE` | `ms-auth` / `ms-platform` | claims exigidas |
@@ -91,8 +93,11 @@ Validadas com Zod no boot. Veja `.env.example`.
 
 ## Métricas
 
-`GET /metrics` (Prometheus) fica fora do curinga `/api/v1` e não é
-roteado para fora. Ele expõe:
+`GET /metrics` (Prometheus) é servido por um servidor HTTP interno, na porta
+`METRICS_PORT` (9464), que sobe e desce junto com a aplicação. A porta pública
+não serve `/metrics` (responde 404, como qualquer rota desconhecida), e no
+compose a porta de métricas não é publicada: só o Prometheus a alcança, pela
+rede interna. Os health checks continuam na porta pública. As métricas são:
 
 - `http_request_duration_seconds{method, route, status_code}`: o `route` é o
   prefixo resolvido (por exemplo `/api/v1/items`), nunca o path concreto, para

@@ -3,6 +3,7 @@ import { createServer, type IncomingHttpHeaders, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import type { INestApplication } from "@nestjs/common";
 import { calculateJwkThumbprint, exportJWK, SignJWT } from "jose";
+import { MetricsServer } from "../../src/infrastructure/metrics/metrics-server";
 import { sampleValue } from "../../src/test/metrics.helpers";
 
 const USER_ID = "11111111-1111-4111-8111-111111111111";
@@ -50,6 +51,7 @@ async function startUpstream(name: string): Promise<FakeUpstream> {
 describe("ms-gateway: autenticacao, autorizacao e proxy (integracao)", () => {
   let app: INestApplication;
   let baseUrl: string;
+  let metricsUrl: string;
   let jwksServer: Server;
   let signingKey: KeyObject;
   let kid: string;
@@ -107,6 +109,7 @@ describe("ms-gateway: autenticacao, autorizacao e proxy (integracao)", () => {
       UPSTREAM_SALES_ORDER_URL: upstreams.salesOrder?.url,
       UPSTREAM_TIMEOUT_MS: "500",
       MAX_BODY_BYTES: "1024",
+      METRICS_PORT: "0",
     });
 
     const { NestFactory } = await import("@nestjs/core");
@@ -116,6 +119,7 @@ describe("ms-gateway: autenticacao, autorizacao e proxy (integracao)", () => {
     configureApp(app);
     await app.listen(0);
     baseUrl = (await app.getUrl()).replace("[::1]", "localhost");
+    metricsUrl = `http://127.0.0.1:${app.get(MetricsServer).port}`;
   });
 
   afterAll(async () => {
@@ -219,9 +223,20 @@ describe("ms-gateway: autenticacao, autorizacao e proxy (integracao)", () => {
     expect((await request("GET", "/health/ready")).status).toBe(200);
   });
 
-  it("GET /metrics: latencia pelo prefixo da rota, nunca pelo path concreto, e erros de proxy", async () => {
-    const text = await (await request("GET", "/metrics")).text();
+  it("porta publica nao serve /metrics (404); health continua nela", async () => {
+    const publicMetrics = await request("GET", "/metrics");
 
+    expect(publicMetrics.status).toBe(404);
+    expect(await publicMetrics.text()).not.toContain("http_request_duration_seconds");
+    expect((await request("GET", "/health/live")).status).toBe(200);
+    expect((await fetch(`${metricsUrl}/health/live`)).status).toBe(404);
+  });
+
+  it("porta de metricas: latencia pelo prefixo da rota, nunca pelo path concreto, e erros de proxy", async () => {
+    const response = await fetch(`${metricsUrl}/metrics`);
+    const text = await response.text();
+
+    expect(response.status).toBe(200);
     expect(
       sampleValue(text, "http_request_duration_seconds_count", {
         method: "GET",

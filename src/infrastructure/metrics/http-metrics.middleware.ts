@@ -4,7 +4,7 @@ import { MetricsService } from "./metrics.service";
 
 // Mede cada requisicao por um label de cardinalidade limitada: o prefixo da
 // rota resolvida pelo gateway (res.locals, ex.: /api/v1/items) ou, nas rotas
-// proprias (health, metrics), o template do Nest. Nunca o path concreto.
+// proprias (health), o template do Nest. Nunca o path concreto.
 @Injectable()
 export class HttpMetricsMiddleware implements NestMiddleware {
   constructor(private readonly metrics: MetricsService) {}
