@@ -48,7 +48,7 @@ Ponto único de entrada da plataforma (NestJS). Cada requisição passa por:
 | `x-user-id`, `x-user-roles` | claims `sub` e `roles` do token validado; qualquer `x-user-*` enviado pelo cliente é removido |
 | `x-correlation-id` | o do cliente (se válido) ou um gerado; também volta na resposta |
 | `x-forwarded-for/proto/host` | adicionados pelo proxy |
-| `Authorization` | **não** é repassado: os serviços confiam no gateway |
+| `Authorization` | repassado só para o ms-auth, que revalida o próprio token em `/users`; os demais serviços não o recebem e confiam no gateway |
 
 ## Erros
 

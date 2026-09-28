@@ -11,7 +11,7 @@ describe("sanitizeForwardedHeaders", () => {
       "content-type": "application/json",
     };
 
-    sanitizeForwardedHeaders(headers, { userId: "u-1", roles: ["admin", "operator"] }, "corr-1");
+    sanitizeForwardedHeaders(headers, { userId: "u-1", roles: ["admin", "operator"] }, "corr-1", false);
 
     expect(headers).toEqual({
       "content-type": "application/json",
@@ -24,8 +24,16 @@ describe("sanitizeForwardedHeaders", () => {
   it("sem principal (rota publica) nao injeta identidade", () => {
     const headers: IncomingHttpHeaders = { "x-user-id": "forjado" };
 
-    sanitizeForwardedHeaders(headers, undefined, "corr-2");
+    sanitizeForwardedHeaders(headers, undefined, "corr-2", false);
 
     expect(headers).toEqual({ "x-correlation-id": "corr-2" });
+  });
+
+  it("para o ms-auth mantem o Authorization (ele revalida o proprio token)", () => {
+    const headers: IncomingHttpHeaders = { authorization: "Bearer abc", "x-user-id": "forjado" };
+
+    sanitizeForwardedHeaders(headers, { userId: "u-1", roles: ["admin"] }, "corr-3", true);
+
+    expect(headers).toMatchObject({ authorization: "Bearer abc", "x-user-id": "u-1" });
   });
 });

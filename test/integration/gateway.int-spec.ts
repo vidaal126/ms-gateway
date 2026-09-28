@@ -179,6 +179,8 @@ describe("ms-gateway: autenticacao, autorizacao e proxy (integracao)", () => {
 
     expect(forbidden.status).toBe(403);
     expect(allowed.status).toBe(201);
+    // So o ms-auth recebe o token (revalida nas rotas de usuario).
+    expect(upstreams.auth?.requests.at(-1)?.headers.authorization).toMatch(/^Bearer /);
   });
 
   it("rota publica de login segue sem token e sem identidade", async () => {

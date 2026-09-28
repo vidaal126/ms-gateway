@@ -43,7 +43,12 @@ export class GatewayController {
       authorization: req.header("authorization"),
     });
     res.locals[METRICS_ROUTE_LOCAL] = `/api/v1${target.route.prefix}`;
-    sanitizeForwardedHeaders(req.headers, principal, resolveCorrelationId(req.id));
+    sanitizeForwardedHeaders(
+      req.headers,
+      principal,
+      resolveCorrelationId(req.id),
+      target.route.upstream === "auth",
+    );
     await this.proxy.forward(target.route.upstream, target.upstreamPath, req, res);
   }
 
