@@ -89,6 +89,17 @@ Validadas com Zod no boot. Veja `.env.example`.
 | `MAX_BODY_BYTES` | 1048576 | limite de corpo |
 | `THROTTLE_DEFAULT_TTL_MS` / `_LIMIT` | 60000 / 300 | rate limit por IP (`trust proxy` para redes privadas) |
 
+## Métricas
+
+`GET /metrics` (Prometheus) fica fora do curinga `/api/v1` e não é
+roteado para fora. Ele expõe:
+
+- `http_request_duration_seconds{method, route, status_code}`: o `route` é o
+  prefixo resolvido (por exemplo `/api/v1/items`), nunca o path concreto, para
+  manter a cardinalidade baixa;
+- `gateway_proxy_errors_total{upstream, kind}`: `kind` é `bad_gateway` ou
+  `timeout`.
+
 ## Health
 
 - `/health/live`: o processo responde.

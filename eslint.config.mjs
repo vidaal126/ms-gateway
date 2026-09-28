@@ -32,7 +32,7 @@ export default tseslint.config(
       ],
       // Classes do Nest (modulos, DTOs) sao vazias ou so com decorators.
       "@typescript-eslint/no-extraneous-class": ["error", { allowWithDecorator: true }],
-      "@typescript-eslint/no-unused-vars": ["error", { ignoreRestSiblings: true }],
+      "@typescript-eslint/no-unused-vars": ["error", { ignoreRestSiblings: true, argsIgnorePattern: "^_" }],
       "@typescript-eslint/restrict-template-expressions": [
         "error",
         { allowNumber: true, allowBoolean: true },

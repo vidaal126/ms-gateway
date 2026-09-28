@@ -12,6 +12,7 @@ import type { Request, Response } from "express";
 import { resolveCorrelationId } from "@common/correlation/correlation-id";
 import { AuthorizeRequestUseCase } from "@application/use-cases/authorize-request.use-case";
 import { type Env, readEnv } from "@config/env";
+import { METRICS_ROUTE_LOCAL } from "@infrastructure/metrics/http-metrics.middleware";
 import { sanitizeForwardedHeaders } from "@infrastructure/proxy/forwarded-headers";
 import { UpstreamProxyService } from "@infrastructure/proxy/upstream-proxy.service";
 
@@ -34,12 +35,14 @@ export class GatewayController {
 
   @All("*path")
   async forward(@Req() req: Request, @Res() res: Response): Promise<void> {
+    res.locals[METRICS_ROUTE_LOCAL] = "unresolved";
     this.assertBodySize(req);
     const { target, principal } = await this.authorize.execute({
       method: req.method,
       url: req.originalUrl,
       authorization: req.header("authorization"),
     });
+    res.locals[METRICS_ROUTE_LOCAL] = `/api/v1${target.route.prefix}`;
     sanitizeForwardedHeaders(req.headers, principal, resolveCorrelationId(req.id));
     await this.proxy.forward(target.route.upstream, target.upstreamPath, req, res);
   }

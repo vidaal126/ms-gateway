@@ -3,6 +3,7 @@ import { createServer, type IncomingHttpHeaders, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import type { INestApplication } from "@nestjs/common";
 import { calculateJwkThumbprint, exportJWK, SignJWT } from "jose";
+import { sampleValue } from "../../src/test/metrics.helpers";
 
 const USER_ID = "11111111-1111-4111-8111-111111111111";
 
@@ -214,5 +215,20 @@ describe("ms-gateway: autenticacao, autorizacao e proxy (integracao)", () => {
   it("health: live e ready (JWKS no ar)", async () => {
     expect((await request("GET", "/health/live")).status).toBe(200);
     expect((await request("GET", "/health/ready")).status).toBe(200);
+  });
+
+  it("GET /metrics: latencia pelo prefixo da rota, nunca pelo path concreto, e erros de proxy", async () => {
+    const text = await (await request("GET", "/metrics")).text();
+
+    expect(
+      sampleValue(text, "http_request_duration_seconds_count", {
+        method: "GET",
+        route: "/api/v1/items",
+        status_code: "200",
+      }),
+    ).toBe(1);
+    expect(text).not.toContain("/api/v1/items/abc");
+    expect(sampleValue(text, "gateway_proxy_errors_total", { upstream: "customer", kind: "bad_gateway" })).toBe(1);
+    expect(sampleValue(text, "gateway_proxy_errors_total", { upstream: "salesOrder", kind: "timeout" })).toBe(1);
   });
 });

@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { LoggerModule } from "@common/logger/logger.module";
 import { type Env, readEnv, validateEnv } from "@config/env";
 import { GatewayModule } from "@infrastructure/gateway.module";
+import { MetricsModule } from "@infrastructure/metrics/metrics.module";
 import { GlobalExceptionFilter } from "@infrastructure/http/filters/global-exception.filter";
 
 @Module({
@@ -23,6 +24,7 @@ import { GlobalExceptionFilter } from "@infrastructure/http/filters/global-excep
         ],
       }),
     }),
+    MetricsModule,
     GatewayModule,
   ],
   providers: [

@@ -7,6 +7,7 @@ import { createProxyMiddleware, type RequestHandler } from "http-proxy-middlewar
 import { type ILogger, LOGGER_TOKEN } from "@common/logger/logger.interface";
 import type { Upstream } from "@domain/routing/route-table";
 import { type Env, readEnv } from "@config/env";
+import { MetricsService } from "@infrastructure/metrics/metrics.service";
 
 type UpstreamUrlKey =
   | "UPSTREAM_AUTH_URL"
@@ -24,6 +25,7 @@ export class UpstreamProxyService {
   constructor(
     config: ConfigService<Env, true>,
     @Inject(LOGGER_TOKEN) private readonly logger: ILogger,
+    private readonly metrics: MetricsService,
   ) {
     const timeoutMs = readEnv(config, "UPSTREAM_TIMEOUT_MS");
     const proxy = (upstream: Upstream, key: UpstreamUrlKey): RequestHandler =>
@@ -69,6 +71,7 @@ export class UpstreamProxyService {
     const code = "code" in err && typeof err.code === "string" ? err.code : undefined;
     const timedOut = code === "ECONNRESET" || code === "ETIMEDOUT" || code === "ESOCKETTIMEDOUT";
     this.logger.warn("Falha ao encaminhar requisicao ao servico", { upstream, code, error: err.message });
+    this.metrics.recordProxyError(upstream, timedOut ? "timeout" : "bad_gateway");
 
     if (!("writeHead" in res) || res.headersSent) {
       res.destroy();

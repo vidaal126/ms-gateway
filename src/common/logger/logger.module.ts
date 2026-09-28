@@ -37,7 +37,7 @@ type ExpressLike = IncomingMessage & { route?: { path?: string } };
           },
           autoLogging: {
             ignore: (req: IncomingMessage): boolean =>
-              req.url?.startsWith("/health") ?? false,
+              (req.url?.startsWith("/health") ?? false) || (req.url?.startsWith("/metrics") ?? false),
           },
           // quietReqLogger + reqId renomeado: o logger da requisicao (usado
           // pelo nestjs-pino em todo log do request) carrega so correlationId,

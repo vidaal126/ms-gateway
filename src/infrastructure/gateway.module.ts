@@ -10,7 +10,8 @@ import { UpstreamProxyService } from "@infrastructure/proxy/upstream-proxy.servi
 
 @Module({
   imports: [TerminusModule],
-  // HealthController antes: /health/* nao pode cair no curinga do gateway.
+  // HealthController (e o MetricsController, no MetricsModule) ficam fora do
+  // curinga: o gateway so trata /api/v1/*.
   controllers: [HealthController, GatewayController],
   providers: [
     { provide: TOKEN_VERIFIER, useClass: JwksTokenVerifier },
