@@ -1,9 +1,11 @@
 # ms-gateway
 
+> Plataforma: [ms-platform](https://github.com/vidaal126/ms-platform#readme) · **ms-gateway** · [ms-auth](https://github.com/vidaal126/ms-auth#readme) · [ms-catalog](https://github.com/vidaal126/ms-catalog#readme) · [ms-transport](https://github.com/vidaal126/ms-transport#readme) · [ms-customer](https://github.com/vidaal126/ms-customer#readme) · [ms-sales-order](https://github.com/vidaal126/ms-sales-order#readme)
+
 Ponto único de entrada da plataforma (NestJS). Cada requisição passa por:
 
 1. **Roteamento**: `/api/v1/<recurso>` vai para o serviço dono do recurso.
-2. **Autenticação**: JWT RS256 emitido pelo [ms-auth](../ms-auth/README.md),
+2. **Autenticação**: JWT RS256 emitido pelo [ms-auth](https://github.com/vidaal126/ms-auth#readme),
    validado localmente com o JWKS em cache. Sem uma chamada ao ms-auth por
    requisição.
 3. **Autorização**: política por rota e por tipo de operação.
@@ -72,7 +74,7 @@ yarn install
 yarn start
 ```
 
-No compose do [ms-platform](../ms-platform/README.md), o gateway é o único
+No compose do [ms-platform](https://github.com/vidaal126/ms-platform#readme), o gateway é o único
 serviço que precisa ser exposto (porta 8088 no host; a 8000 costuma estar ocupada pelo Portainer).
 
 ## Variáveis de ambiente
