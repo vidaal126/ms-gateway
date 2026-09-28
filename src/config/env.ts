@@ -6,7 +6,7 @@ const httpUrl = z.url({ protocol: /^https?$/ });
 
 export const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  PORT: z.coerce.number().int().min(1).max(65535).default(8000),
+  PORT: z.coerce.number().int().min(1).max(65535).default(8088),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 
   // Servicos internos (sem barra final).

@@ -73,7 +73,7 @@ yarn start
 ```
 
 No compose do [ms-platform](../ms-platform/README.md), o gateway é o único
-serviço que precisa ser exposto (porta 8000).
+serviço que precisa ser exposto (porta 8088 no host; a 8000 costuma estar ocupada pelo Portainer).
 
 ## Variáveis de ambiente
 
